@@ -1,0 +1,54 @@
+function onOpen() {
+var spreadsheet = SpreadsheetApp.getActive();
+  var menuItems = [
+  { name: 'Pull Bing Email Report', functionName: 'pullBingReport'},  
+  { name: 'Pull Quinstreet Email Report', functionName: 'grabAttachments'},  
+  { name: 'Log Bing Data Report', functionName: 'copyToLog'},
+  { name: 'Log Quinstreet Data Report', functionName: 'copyToLogQS'},
+  { name: 'Log Dianomi Data Report', functionName: 'copyToLogDianomi'}  
+
+  ];
+  spreadsheet.addMenu('Pull Reports', menuItems);
+
+}
+
+function pullBingReport() {
+var sheet = SpreadsheetApp.getActive().getSheetByName("Bing MTD");
+sheet.clearContents(); // clears contents from sheet
+  
+  
+  //Logger.log(sheet.getSheetName());  //ok
+  
+  
+  
+  var label = GmailApp.getUserLabelByName("Bing Ads"); // The label we are trying to find based on the array position 
+  //Logger.log(label); //ok
+  
+  var threads = label.getThreads(); // grabs all the mails containing that label  
+  var messages = threads[0].getMessages(); 
+  var attachType = messages[0].getAttachments();
+  var name = "USFIN___Bing___Performance___Yesterday.zip"
+  var indexOfAttachment;
+
+    for(var i in attachType){
+    if(attachType[i].getName() == name){
+     indexOfAttachment = i;
+    }
+    } 
+
+  attachType[indexOfAttachment].getContentType(); 
+  //Logger.log(attachType[0].getContentType();   
+  
+  var tozip = attachType[indexOfAttachment].setContentTypeFromExtension(); // sets the content type based on the extension.
+  
+  var unZip = Utilities.unzip(tozip); //assigns the unzipped file to a new variable
+  
+  //Logger.log(unZip[0].getContentType()); // logs the content type from the unzipped value  
+  
+  var table = Utilities.parseCsv(unZip[indexOfAttachment].getDataAsString());
+  var sheet = SpreadsheetApp.getActive().getSheetByName("Bing MTD"); 
+  
+  for(var i = 0; i < table.length; i++){    
+ sheet.appendRow(table[i]); //appends array columns information
+  }
+}
